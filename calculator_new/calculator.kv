@@ -1,0 +1,56 @@
+<CalcButton@Button>:
+    font_size: "25sp"
+<Calc@BoxLayout>:
+    orientation: "vertical"
+<Base>:
+    Calc1:
+        root: root
+    Calc2:
+        root: root
+    Calc3:
+        root: root
+    Calc4:
+        root: root
+<Root>:
+    orientation: "vertical"
+    label_text: label_text
+    out: out
+    BoxLayout:
+        orientation: "horizontal"
+        size_hint: (1, .1)
+        BoxLayout:
+            orientation: "horizontal"
+            CalcButton:
+                text: "<"
+                on_release: root.prev()
+            Label:
+                text: ""
+                canvas.before:
+                    Color:
+                        rgba: .35, .35, .35, 1
+                    Rectangle:
+                        size: self.size
+                        pos: self.pos
+            CalcButton:
+                text: ">"
+                on_release: root.next()
+        Label:
+            font_size: "25sp"
+            text: "Normal"
+            id: label_text
+            padding: (30, 0)
+            canvas.before:
+                Color:
+                    rgba: .35, .35, .35, 1
+                Rectangle:
+                    size: self.size
+                    pos: self.pos
+    Label:
+        font_size: "25sp"
+        text: "0"
+        id: out
+        text_size: self.size
+        size_hint: (1, .2)
+        halign: "right"
+        valign: "center"
+        padding: (30, 0)
