@@ -1,10 +1,11 @@
 from config import *
-from math import sqrt, e, pi, factorial, log
+from math import sqrt, e, pi, factorial, log, sin, cos, tan, radians
 
 class Calculator:
     def __init__(self):
         self.value = "0"
         self.memory = "0"
+        self.angle_unit = 1
     
     def mem(self, mode):
         if mode == "MC":
@@ -24,7 +25,7 @@ class Calculator:
     
     def check_value(self, item):
         print(item, self.value[-1])
-        if item in ["(", "√", "-", "1/", str(e), str(pi), "10^", "log(", "ln(", "abs("] and self.value == "0": return True
+        if item in ["(", "√", "-", "1/", str(e), str(pi), "10^", "log(", "ln(", "abs(", "sin(", "cos(", "tan(", "sec(", "csc(", "cot("] and self.value == "0": return True
         if item == "e" and self.value == "0": return False
         if item == "(" and self.value[-1] not in ["+", "−", "×", "÷", "√", "^", "%", "("]: return False
         elif item == ")" and self.value[-1] not in numbers + [")"]: return False
@@ -48,6 +49,12 @@ class Calculator:
         elif item == "log(" and self.value[-1] not in ["+", "−", "×", "÷", "√", "^"]: return False
         elif item == "ln(" and self.value[-1] not in ["+", "−", "×", "÷", "√", "^"]: return False
         elif item == "abs(" and self.value[-1] not in ["+", "−", "×", "÷", "√", "^"]: return False
+        elif item == "sin(" and self.value[-1] not in ["+", "−", "×", "÷", "√", "^"]: return False
+        elif item == "cos(" and self.value[-1] not in ["+", "−", "×", "÷", "√", "^"]: return False
+        elif item == "tan(" and self.value[-1] not in ["+", "−", "×", "÷", "√", "^"]: return False
+        elif item == "sec(" and self.value[-1] not in ["+", "−", "×", "÷", "√", "^"]: return False
+        elif item == "csc(" and self.value[-1] not in ["+", "−", "×", "÷", "√", "^"]: return False
+        elif item == "cot(" and self.value[-1] not in ["+", "−", "×", "÷", "√", "^"]: return False
         return True
     
     def add_value(self, item):
@@ -87,6 +94,7 @@ class Calculator:
         try: self.value = self.eval(operations)
         except OverflowError: self.value = "Overflow Error"
         except ZeroDivisionError: self.value = "Zero Division Error"
+        except ValueError: self.value = "Syntax Error"
         except Exception as e: raise e
 
     def eval(self, exp):
@@ -101,21 +109,65 @@ class Calculator:
                         return answer
                     operations[i] = answer
         
+        print(operations)
+        
         # Functions
         while "log" in operations:
-             i = operations.index("log")
-             del operations[i]
-             operations[i] = str(log(float(operations[i]), 10))
+            i = operations.index("log")
+            del operations[i]
+            operations[i] = str(log(float(operations[i]), 10))
         
         while "ln" in operations:
-             i = operations.index("ln")
-             del operations[i]
-             operations[i] = str(log(float(operations[i])))
+            i = operations.index("ln")
+            del operations[i]
+            operations[i] = str(log(float(operations[i])))
         
         while "abs" in operations:
-             i = operations.index("abs")
-             del operations[i]
-             operations[i] = str(abs(float(operations[i])))
+            i = operations.index("abs")
+            del operations[i]
+            operations[i] = str(abs(float(operations[i])))
+        
+        while "sin" in operations:
+            i = operations.index("sin")
+            del operations[i]
+            if self.angle_unit: operations[i] = str(radians(float(operations[i])))
+            operations[i] = str(sin(float(operations[i])))
+            if float(operations[i]) < float("1e-10"): operations[i] = "0"
+        
+        while "cos" in operations:
+            i = operations.index("cos")
+            del operations[i]
+            if self.angle_unit: operations[i] = str(radians(float(operations[i])))
+            operations[i] = str(cos(float(operations[i])))
+            if float(operations[i]) < float("1e-10"): operations[i] = "0"
+        
+        while "tan" in operations:
+            i = operations.index("tan")
+            del operations[i]
+            if self.angle_unit: operations[i] = str(radians(float(operations[i])))
+            operations[i] = str(tan(float(operations[i])))
+            if float(operations[i]) < float("1e-10"): operations[i] = "0"
+        
+        while "sec" in operations:
+            i = operations.index("sec")
+            del operations[i]
+            if self.angle_unit: operations[i] = str(radians(float(operations[i])))
+            operations[i] = str(1 / cos(float(operations[i])))
+            if float(operations[i]) < float("1e-10"): operations[i] = "0"
+        
+        while "csc" in operations:
+            i = operations.index("csc")
+            del operations[i]
+            if self.angle_unit: operations[i] = str(radians(float(operations[i])))
+            operations[i] = str(1 / sin(float(operations[i])))
+            if float(operations[i]) < float("1e-10"): operations[i] = "0"
+        
+        while "cot" in operations:
+            i = operations.index("cot")
+            del operations[i]
+            if self.angle_unit: operations[i] = str(radians(float(operations[i])))
+            operations[i] = str(1 / tan(float(operations[i])))
+            if float(operations[i]) < float("1e-10"): operations[i] = "0"
         
         # Sqrt
         while "√" in operations:
@@ -164,10 +216,15 @@ class Calculator:
             else: operations[index - 1] = str(float(operations[index - 1]) - float(operations[index]))
             del operations[index]
         
-        operations[0] = f"{operations[0]:.10}"
-        if operations[0][-2:] == ".0": operations[0] = str(int(float(operations[0])))
+        ending = ""
+        if "e" in operations[0]:
+            index = operations[0].index("e")
+            ending = operations[0][index:]
+            operations[0] = operations[0][:index]
+        operations[0] += ending
         if operations[0] == "inf": return "Overflow Error"
         if operations[0] == "nan": return "Math Error"
+        if int(float(operations[0])) == float(operations[0]): operations[0] = str(float(operations[0]))[:-2]
         return operations[0]
 
     def clear(self):

@@ -15,6 +15,7 @@
     orientation: "vertical"
     label_text: label_text
     out: out
+    unit: unit
     BoxLayout:
         orientation: "horizontal"
         size_hint: (1, .1)
@@ -23,22 +24,18 @@
             CalcButton:
                 text: "<"
                 on_release: root.prev()
-            Label:
-                text: ""
-                canvas.before:
-                    Color:
-                        rgba: .35, .35, .35, 1
-                    Rectangle:
-                        size: self.size
-                        pos: self.pos
+            Button:
+                id: unit
+                on_release: root.switch()
+                text: "Degrees"
+                font_size: "20sp"
             CalcButton:
                 text: ">"
                 on_release: root.next()
         Label:
-            font_size: "25sp"
+            font_size: "20sp"
             text: "Normal"
             id: label_text
-            padding: (30, 0)
             canvas.before:
                 Color:
                     rgba: .35, .35, .35, 1

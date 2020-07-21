@@ -19,8 +19,9 @@
             on_press: root.root.mem(self.text)
     BoxLayout:
         CalcButton:
-            text: "2[sup]nd[/sup]"
+            text: "√[i]x[/i]"
             markup: True
+            on_press: root.root.add_value("√")
         CalcButton:
             text: "π"
             on_press: root.root.add_value(str(math.pi))

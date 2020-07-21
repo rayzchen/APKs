@@ -31,11 +31,12 @@
             text: "exp"
             on_press: root.root.add_value("e")
         CalcButton:
-            text: "X[sup]Y[/sup]"
+            text: "[i]X[/i][sup]Y[/sup]"
             markup: True
             on_press: root.root.add_value("^")
         CalcButton:
-            text: "√"
+            text: "√[i]x[/i]"
+            markup: True
             on_press: root.root.add_value(self.text)
         CalcButton:
             text: "+"
