@@ -1,3 +1,0 @@
-title=Calculator
-author=Ray Chen
-orientation=landscape
