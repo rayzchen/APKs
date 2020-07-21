@@ -1,12 +1,13 @@
 from config import *
-from math import sqrt, e, pi
+from math import sqrt, e, pi, factorial
 
 class Calculator:
     def __init__(self):
         self.value = "0"
     
     def check_value(self, item):
-        if item in ["(", "√", "-"] and self.value == "0": return True
+        if item in ["(", "√", "-", "1/", e, pi] and self.value == "0": return True
+        if item == "e" and self.value == "0": return False
         if item == "(" and self.value[-1] not in ["+", "−", "×", "÷", "√", "^"]: return False
         elif item == ")" and self.value[-1] not in numbers + [")"]: return False
         elif item == "e" and self.value[-1] not in numbers: return False
@@ -21,18 +22,23 @@ class Calculator:
         elif item in numbers and self.value[-1] == ")": return False
         elif item == pi and self.value[-1] not in ["+", "−", "×", "÷", "√", "^"]: return False
         elif item == e and self.value[-1] not in ["+", "−", "×", "÷", "√", "^"]: return False
+        elif item == "^2" and self.value[-1] not in numbers + [")"]: return False
+        elif item == "1/" and self.value[-1] not in ["+", "−", "×", "÷", "√", "^"]: return False
+        elif item == "%" and self.value[-1] not in numbers + [")"]: return False
+        elif item == "!" and self.value[-1] not in numbers + [")"]: return False
+        elif item == "10^" and self.value[-1] not in ["+", "−", "×", "÷", "√", "^"]: return False
         return True
     
     def add_value(self, item):
         if self.check_value(item):
-            if self.value == "0" and item not in ["+", "−", "×", ".", "^", "÷"]: self.value = item
+            if self.value == "0" and item not in ["+", "−", "×", ".", "^", "÷", "!"]: self.value = item
             else: self.value += item
     
     def parse(self, exp):
         l = []
         string = ""
         for char in exp:
-            if char not in ("√", "(", "÷", "×", "−", "+" , ")", "^") or (len(string) and ((char == "+" or char == "-") and string[-1] == "e")):
+            if char not in ["√", "(", "÷", "×", "−", "+" , ")", "^", "%", "!"] or (len(string) and ((char == "+" or char == "-") and string[-1] == "e")):
                 string += char
             else:
                 if string != "":
@@ -85,16 +91,26 @@ class Calculator:
             del operations[i]
             operations[i - 1] = str(float(operations[i - 1]) ** float(operations[i]))
             del operations[i]
+            
+        # Factorial
+        while "!" in operations:
+            i = operations.index("!")
+            if i == 0:
+                return "Syntax Error"
+            del operations[i]
+            operations[i - 1] = str(factorial(float(operations[i - 1])))
         
-        # /*
-        while "×" in operations or "÷" in operations:
+        # /*%
+        while "×" in operations or "÷" in operations or "%" in operations:
             i = operations.index("×") if "×" in operations else len(operations)
             j = operations.index("÷") if "÷" in operations else len(operations)
-            op = "×" if i < j else "÷"
-            index = i if i < j else j
+            k = operations.index("%") if "%" in operations else len(operations)
+            op = "×" if min([i, j, k]) == i else "÷" if min([i, j, k]) == j else "%"
+            index = min([i, j, k])
             del operations[index]
             if op == "×": operations[index - 1] = str(float(operations[index - 1]) * float(operations[index]))
-            else: operations[index - 1] = str(float(operations[index - 1]) / float(operations[index]))
+            elif op == "÷": operations[index - 1] = str(float(operations[index - 1]) / float(operations[index]))
+            elif op == "%": operations[index - 1] = str(float(operations[index - 1]) % float(operations[index]))
             del operations[index]
         
         # +-
