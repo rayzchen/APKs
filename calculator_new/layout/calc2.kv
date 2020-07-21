@@ -45,6 +45,7 @@
         CalcButton:
             text: "|[i]x[/i]|"
             markup: True
+            on_press: root.root.add_value("abs(")
         CalcButton:
             text: "exp"
             on_press: root.root.add_value("e")
@@ -106,6 +107,7 @@
     BoxLayout:
         CalcButton:
             text: "log"
+            on_press: root.root.add_value("log(")
         CalcButton:
             text: "1"
             on_press: root.root.add_value(self.text)
@@ -121,6 +123,7 @@
     BoxLayout:
         CalcButton:
             text: "ln"
+            on_press: root.root.add_value("ln(")
         CalcButton:
             text: "+/-"
             on_press: root.root.add_value("-")

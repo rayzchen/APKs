@@ -1,37 +1,58 @@
 from config import *
-from math import sqrt, e, pi, factorial
+from math import sqrt, e, pi, factorial, log
 
 class Calculator:
     def __init__(self):
         self.value = "0"
+        self.memory = "0"
+    
+    def mem(self, mode):
+        if mode == "MC":
+            self.memory = "0"
+        elif mode == "M+":
+            self.calc()
+            self.memory = str(float(self.value) + float(self.memory))
+        elif mode == "M-":
+            self.calc()
+            self.memory = str(float(self.value) - float(self.memory))
+        elif mode == "MS":
+            self.calc()
+            self.memory = str(self.value)
+        elif mode == "MRC":
+            self.calc()
+            self.value = self.memory
     
     def check_value(self, item):
-        if item in ["(", "√", "-", "1/", e, pi] and self.value == "0": return True
+        print(item, self.value[-1])
+        if item in ["(", "√", "-", "1/", str(e), str(pi), "10^", "log(", "ln(", "abs("] and self.value == "0": return True
         if item == "e" and self.value == "0": return False
-        if item == "(" and self.value[-1] not in ["+", "−", "×", "÷", "√", "^"]: return False
+        if item == "(" and self.value[-1] not in ["+", "−", "×", "÷", "√", "^", "%", "("]: return False
         elif item == ")" and self.value[-1] not in numbers + [")"]: return False
         elif item == "e" and self.value[-1] not in numbers: return False
         elif item == "^" and self.value[-1] not in numbers + [")"]: return False
-        elif item == "√" and self.value[-1] not in ["+", "−", "×", "÷", "^"]: return False
+        elif item == "√" and self.value[-1] not in ["+", "−", "×", "÷", "^", "%", "("]: return False
         elif item == "+" and self.value[-1] not in numbers + ["e", ")"]: return False
         elif item == "−" and self.value[-1] not in numbers + [")"]: return False
         elif item == "×" and self.value[-1] not in numbers + [")"]: return False
         elif item == "÷" and self.value[-1] not in numbers + [")"]: return False
-        elif item == "-" and self.value[-1] not in ["e", "(", "+", "−", "×", "÷", "^"]: return False
+        elif item == "-" and self.value[-1] not in ["e", "(", "+", "−", "×", "÷", "^", "%"]: return False
         elif item == "." and self.value[-1] not in numbers: return False
         elif item in numbers and self.value[-1] == ")": return False
-        elif item == pi and self.value[-1] not in ["+", "−", "×", "÷", "√", "^"]: return False
-        elif item == e and self.value[-1] not in ["+", "−", "×", "÷", "√", "^"]: return False
+        elif item == str(pi) and self.value[-1] not in ["+", "−", "×", "÷", "√", "^", "%", "("]: return False
+        elif item == str(e) and self.value[-1] not in ["+", "−", "×", "÷", "√", "^", "%", "("]: return False
         elif item == "^2" and self.value[-1] not in numbers + [")"]: return False
         elif item == "1/" and self.value[-1] not in ["+", "−", "×", "÷", "√", "^"]: return False
         elif item == "%" and self.value[-1] not in numbers + [")"]: return False
         elif item == "!" and self.value[-1] not in numbers + [")"]: return False
         elif item == "10^" and self.value[-1] not in ["+", "−", "×", "÷", "√", "^"]: return False
+        elif item == "log(" and self.value[-1] not in ["+", "−", "×", "÷", "√", "^"]: return False
+        elif item == "ln(" and self.value[-1] not in ["+", "−", "×", "÷", "√", "^"]: return False
+        elif item == "abs(" and self.value[-1] not in ["+", "−", "×", "÷", "√", "^"]: return False
         return True
     
     def add_value(self, item):
         if self.check_value(item):
-            if self.value == "0" and item not in ["+", "−", "×", ".", "^", "÷", "!"]: self.value = item
+            if self.value == "0" and item not in ["+", "−", "×", ".", "^", "÷", "!", "^", "%"]: self.value = item
             else: self.value += item
     
     def parse(self, exp):
@@ -45,7 +66,7 @@ class Calculator:
                     l.append(string)
                     string = ""
                 l.append(char)
-        l.append(string)
+        if string != "": l.append(string)
 
         if "(" in l:
             while "(" in l or ")" in l:
@@ -54,7 +75,7 @@ class Calculator:
                 middle = l[open + 1:close]
                 del l[open + 1:close + 1]
                 l[open] = middle
-        
+        print(l)
         return l
     
     def calc(self):
@@ -66,16 +87,35 @@ class Calculator:
         try: self.value = self.eval(operations)
         except OverflowError: self.value = "Overflow Error"
         except ZeroDivisionError: self.value = "Zero Division Error"
-        except ValueError: self.value = "Syntax Error"
+        except Exception as e: raise e
 
     def eval(self, exp):
         operations = exp.copy()
+        
+        # Brackets
         if any(type(item) is list for item in operations):
             for i in range(len(operations)):
-                answer = self.eval(operations[i])
-                if "Error" in answer:
-                    return answer
-                operations[i] = answer
+                if type(operations[i]) is list:
+                    answer = self.eval(operations[i])
+                    if "Error" in answer:
+                        return answer
+                    operations[i] = answer
+        
+        # Functions
+        while "log" in operations:
+             i = operations.index("log")
+             del operations[i]
+             operations[i] = str(log(float(operations[i]), 10))
+        
+        while "ln" in operations:
+             i = operations.index("ln")
+             del operations[i]
+             operations[i] = str(log(float(operations[i])))
+        
+        while "abs" in operations:
+             i = operations.index("abs")
+             del operations[i]
+             operations[i] = str(abs(float(operations[i])))
         
         # Sqrt
         while "√" in operations:
@@ -85,7 +125,7 @@ class Calculator:
         
         # Indices
         while "^" in operations:
-            i = operations.index("^")
+            i = max(idx for idx, val in enumerate(operations) if val == "^")
             if i == 0:
                 return "Syntax Error"
             del operations[i]
@@ -124,7 +164,8 @@ class Calculator:
             else: operations[index - 1] = str(float(operations[index - 1]) - float(operations[index]))
             del operations[index]
         
-        if operations[0][-2:] == ".0": operations[0] = str(round(float(operations[0]), 10))[:-2]
+        operations[0] = f"{operations[0]:.10}"
+        if operations[0][-2:] == ".0": operations[0] = str(int(float(operations[0])))
         if operations[0] == "inf": return "Overflow Error"
         if operations[0] == "nan": return "Math Error"
         return operations[0]

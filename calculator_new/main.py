@@ -39,6 +39,7 @@ class Base(BoxLayout):
     def calc(self):
         self.calculator.calc()
         self.root.out.text = self.calculator.value
+        print(self.calculator.value)
         if "Error" in self.calculator.value:
             self.calculator.value = "0"
     
